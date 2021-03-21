@@ -64,7 +64,7 @@ class ControladorMaster {
                 $arrayCabecera = $guardar->meta($tabla); //armo la cabecera del array con los datos de la tabla de BD
                 $sentencia = $guardar->armarSentencia($arrayCabecera, $tabla); //armo la sentencia
                 $array = $guardar->armarArray($arrayCabecera, $datosCampos); //armo el array con los datos de la vista y los datos que obtuve de la BD 
-                array_shift($array); //remuevo el primer elemento id si es nuevo se genera automaticamente en la BD
+                //array_shift($array); //remuevo el primer elemento id si es nuevo se genera automaticamente en la BD
                 $this->refControladorPersistencia->ejecutarSentencia($sentencia, $array); //genero la consulta
                 $this->refControladorPersistencia->get_conexion()->commit();
                 $this->refControladorPersistencia->get_conexion()->beginTransaction();

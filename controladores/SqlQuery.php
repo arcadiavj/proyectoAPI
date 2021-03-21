@@ -185,38 +185,32 @@ class SqlQuery {
         $limpArray = array(); //en este solo quito los datos que no representan nada en esta acción 
         $i = 0; //contador para los foreach de datos
         $j = 0; //contador para las fechas
-        $id = array_values($arrayDatos)[0];
+        $id = 0;//array_values($arrayDatos)[0];
+        array_shift($arrayCabecera);
+        $lenght= count($arrayDatos)-1;
+        
+        
         foreach ($arrayDatos as $llave => $value) {//recorro los datos del array de datos
-            if ($llave != "accion") {//mientras no lleguemos a la llave acción sequimos incorporando al array los datos
+            if ($i <= $lenght ) {//mientras no lleguemos a la llave acción sequimos incorporando al array los datos
                 $limpArray[$i] = $value; //todos los valores .... con su respectivo indice
             } else {//sino $)
                 $i = 0; //reinicio el contador ... llegué al final
                 break; //termino el método
             }
             $i++; //autoincremento la variable $i
-        }
+        } 
+        $i=0;
         foreach ($arrayCabecera as $llave => $value) {//utilizo este foreach para cargar los datos en un array con sus respectivas llaves.... tal cual esta en la BD
-            $fch = explode("_", $llave); //verifico si es un campo fecha
-            if ($fch[0] == "fch") {//si es un campo fecha ingreso 
-                if ($j == 0 && $id == '0') {
-                    $paramArray[$llave] = $this->fechaArray($id, $j, NULL); //llamo a la función correspondiente para que se encargue de llenar el array
-                } else if ($j == 0) {
-                    $paramArray[$llave] = $this->fechaArray($id, $j, $limpArray[$i]);
-                } else {
-                    $paramArray[$llave] = $this->fechaArray($id, $j, NULL);
-                }
-                $j++;
-            } else {//sino *)
-                $paramArray[$llave] = $limpArray[$i]; //cargo los datos del array con los datos que limpié en el foreach anterior...
-            }
+            $paramArray[$llave] = $limpArray[$i];                
             $i++; //auto incremento
         }
+        
         return $paramArray; //regreso el array que se encuentra armado y listo para ser insertado en la BD
     }
 
     public function buscarUltimo($tabla) {//Esta función busca el máximo ID cargado el la tabla correspondiente para reguresar el dato
         $strTabla = strtolower(substr($tabla, 11));
-        $sentencia = "SELECT MAX(id_" . $strTabla . ") FROM " . $strTabla; //es solo para no repetir la sentencia un montón de veces en el BDSentencias
+        $sentencia = "SELECT MAX(id) FROM " . $strTabla; //es solo para no repetir la sentencia un montón de veces en el BDSentencias
         return $sentencia; //obvio.... regreso la sentencia
     }
 
@@ -273,7 +267,7 @@ class SqlQuery {
 
     public function buscarId($dato, $tabla) {//sirve para generar la sentencia que se encarga de buscar un id en la tabla 
         $strTabla = strtolower(substr($tabla, 11)); //al obtener de la clase el nombre de la clase de digo que quiero que parta la palabra controlador y me haga la consulta con el nombre del formulario
-        $consulta = "SELECT * FROM " . $strTabla . " WHERE id_" . $strTabla . " = " . $dato; //ésta es la consulta ensambalda... tambien se prodria utilizar unida a un INNER JOIN todavía al momento de escribir esto todavía estoy pensando como hacerlo ;)
+        $consulta = "SELECT * FROM " . $strTabla . " WHERE id = " . $dato; //ésta es la consulta ensambalda... tambien se prodria utilizar unida a un INNER JOIN todavía al momento de escribir esto todavía estoy pensando como hacerlo ;)
         return $consulta; //regreso la consulta
     }
 

@@ -322,17 +322,11 @@ $app->get('/usuariosApi', function() {
 $app->post('/bonificacion',/*'authenticate'*/ function() use ($app) {
     // check for required params
     //verifyRequiredParams(array());
-    var_dump($app->request);    
     $response = array();
     /*capturamos los parametros recibidos y los almacenamos como un nuevo array asociativo 
-    para poder enviarlos a la BD*/
-    $param['creacion']  = $app->request->post('creacion');
-    $param['creador'] = $app->request->post('creador');
-    $param['periodo']  = $app->request->post('periodo');
-    $param['monto']  = $app->request->post('monto');
-    $param['observacion']  = $app->request->post('observacion');
-    $param['tipo']  = $app->request->post('tipo');
-
+    para poder enviarlos a la BD*/    
+    $param = $app->request->Post();    
+    //var_dump($param);
 
     /* llamamos al metodo que almacene el nuevo dato, por ejemplo: */
 
@@ -351,6 +345,105 @@ $app->post('/bonificacion',/*'authenticate'*/ function() use ($app) {
     }
     echoResponse(201, $response);
 });
+
+$app->post('/bonificacionDestinatario',/*'authenticate'*/ function() use ($app) {
+    // check for required params
+    //verifyRequiredParams(array());
+    $response = array();
+    /*capturamos los parametros recibidos y los almacenamos como un nuevo array asociativo 
+    para poder enviarlos a la BD*/    
+    $param = $app->request->Post();
+    /* llamamos al metodo que almacene el nuevo dato, por ejemplo: */
+    include_once '../controladores/ControladorBonificaciones_destinatarios.php';
+    $consulta = new ControladorBonificaciones_destinatarios();
+    $registros = $consulta->guardar($param);        
+    
+
+    if ( is_array($param) ) {
+        $response["error"] = false;
+        $response["message"] = "Registro creado satisfactoriamente!";
+        $response["registro"] = $param;
+    } else {
+        $response["error"] = true;
+        $response["message"] = "Error al crear registro. Por favor intenta nuevamente.";
+    }
+    echoResponse(201, $response);
+});
+
+$app->post('/contable',/*'authenticate'*/ function() use ($app) {
+    // check for required params
+    //verifyRequiredParams(array());
+    $response = array();
+    /*capturamos los parametros recibidos y los almacenamos como un nuevo array asociativo 
+    para poder enviarlos a la BD*/    
+    $param = $app->request->Post();
+    /* llamamos al metodo que almacene el nuevo dato, por ejemplo: */
+    include_once '../controladores/ControladorContable_diario.php';
+    $consulta = new ControladorContable_diario();
+    $registros = $consulta->guardar($param);        
+    
+
+    if ( is_array($param) ) {
+        $response["error"] = false;
+        $response["message"] = "Registro creado satisfactoriamente!";
+        $response["registro"] = $param;
+    } else {
+        $response["error"] = true;
+        $response["message"] = "Error al crear registro. Por favor intenta nuevamente.";
+    }
+    echoResponse(201, $response);
+});
+$app->post('/contableRes',/*'authenticate'*/ function() use ($app) {
+    // check for required params
+    //verifyRequiredParams(array());
+    $response = array();
+    /*capturamos los parametros recibidos y los almacenamos como un nuevo array asociativo 
+    para poder enviarlos a la BD*/    
+    $param = $app->request->Post();
+    validarCorreo($param['correo']);
+    //$app->stop();    
+    
+    /* llamamos al metodo que almacene el nuevo dato, por ejemplo: */
+    include_once '../controladores/ControladorContable_resumen.php';
+    $consulta = new ControladorContable_resumen();
+    $registros = $consulta->guardar($param);        
+    
+
+    if ( is_array($param) ) {
+        $response["error"] = false;
+        $response["message"] = "Registro creado satisfactoriamente!";
+        $response["registro"] = $param;
+    } else {
+        $response["error"] = true;
+        $response["message"] = "Error al crear registro. Por favor intenta nuevamente.";
+    }
+    echoResponse(201, $response);
+});
+
+$app->post('/notificacion',/*'authenticate'*/ function() use ($app) {
+    // check for required params
+    //verifyRequiredParams(array());
+    $response = array();
+    /*capturamos los parametros recibidos y los almacenamos como un nuevo array asociativo 
+    para poder enviarlos a la BD*/    
+    $param = $app->request->Post();    
+    /* llamamos al metodo que almacene el nuevo dato, por ejemplo: */
+    include_once '../controladores/ControladorNotificaciones.php';
+    $consulta = new ControladorNotificaciones();
+    $registros = $consulta->guardar($param);        
+    
+
+    if ( is_array($param) ) {
+        $response["error"] = false;
+        $response["message"] = "Registro creado satisfactoriamente!";
+        $response["registro"] = $param;
+    } else {
+        $response["error"] = true;
+        $response["message"] = "Error al crear registro. Por favor intenta nuevamente.";
+    }
+    echoResponse(201, $response);
+});
+
 
 /* corremos la aplicación */
 $app->run();
@@ -421,4 +514,12 @@ function echoResponse($status_code, $response) {
 }
 
 
+function validarCorreo($correo){
 
+    if ($correo){
+        echo "no es un correo valido";
+    }else{
+        return;
+    }
+
+}
