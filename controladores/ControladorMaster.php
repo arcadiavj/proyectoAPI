@@ -56,11 +56,12 @@ class ControladorMaster {
     }
 
     public function guardar($tabla, $datosCampos) {
-        $guardar = new SqlQuery();
+        $guardar = new SqlQuery();        
         $existe = $this->verificar($tabla, $datosCampos);
         if ($existe[0]['COUNT(*)'] == '1') {//solamente si el usuario no existe se comienza con la carga a la BD
             try {
-                $this->refControladorPersistencia->get_conexion()->beginTransaction();  //comienza la transacción
+                $this->refControladorPersistencia->get_conexion()->beginTransaction();
+                  //comienza la transacción
                 $arrayCabecera = $guardar->meta($tabla); //armo la cabecera del array con los datos de la tabla de BD
                 $sentencia = $guardar->armarSentencia($arrayCabecera, $tabla); //armo la sentencia
                 $array = $guardar->armarArray($arrayCabecera, $datosCampos); //armo el array con los datos de la vista y los datos que obtuve de la BD 
@@ -79,7 +80,6 @@ class ControladorMaster {
                 echo $exc->getTraceAsString();
                 $this->refControladorPersistencia->get_conexion()->rollBack();  //si hay algún error hace rollback
             }
-            var_dump($id);
             $respuesta = $this->getUsuario($id, $tabla); //busco el usuario
             return $respuesta; //regreso
         } else {
@@ -264,6 +264,28 @@ class ControladorMaster {
             echo $exc->getTraceAsString();
             $this->refControladorPersistencia->get_conexion()->rollBack(); //si salio mal hace un rollback
         }
+    }
+
+    public function verificarExistenciaEnTabla($tabla, $datosCampos) {
+        try {
+            $verifica = new SqlQuery();
+            $this->refControladorPersistencia->get_conexion()->beginTransaction(); //comienza transaccion
+            if ($tabla == "ControladorUsuario") {//uso para diferenciar si es usuario u otra clase
+                $rtaVerifUser = $this->refControladorPersistencia->ejecutarSentencia(
+                        $verifica->verificarExistenciaUsuario($tabla, $datosCampos["usuario"])); //verifico existencia de usuairo
+            } else {
+                $rtaVerifUser = $this->refControladorPersistencia->ejecutarSentencia(
+                    $verifica->verificarExistenciaEnTabla($tabla, $datosCampos));
+                        //$verifica->verificarExistencia($tabla, $datosCampos[$this->getCampo($datosCampos)])); //verifico si ya hay un usuario con ese nombre 
+                    }
+                    //$user = $statement->fetchAll(PDO::FETCH_ASSOC);
+            $existe = $rtaVerifUser->fetchAll(PDO::FETCH_ASSOC); //paso a un array
+            $this->refControladorPersistencia->get_conexion()->commit(); //cierro
+        } catch (PDOException $excepcionPDO) {
+            echo "<br>Error PDO: " . $excepcionPDO->getTraceAsString() . '<br>';
+            $this->refControladorPersistencia->get_conexion()->rollBack(); //si salio mal hace un rollback
+        }
+        return $existe;
     }
 
 }

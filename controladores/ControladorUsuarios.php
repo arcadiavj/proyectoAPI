@@ -42,7 +42,14 @@ class ControladorUsuarios extends ControladorGeneral {
     public function guardar($datosCampos) {//funcion guardar con SqlQuery implementado
         (string) $tabla = get_class($this); //obtengo el nombre de la clase para poder realizar la consulta
         $master = new ControladorMaster();
-        return $master->guardar($tabla,$datosCampos);         
+        $usuario = $master->verificarExistenciaEnTabla($tabla, $datosCampos['usuario']);
+        if($usuario['0']['COUNT(*)'] == '0'){
+            return $master->guardar($tabla,$datosCampos);
+        }else{
+            
+            return $respuesta = array("codigo" => '400');
+        }
+                 
     }
 
     public function ultimo() {//utiliza clase SqlQuery para automatizar consulta        

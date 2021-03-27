@@ -382,6 +382,12 @@ class SqlQuery {
         return "SELECT COUNT(*) FROM " . $strTabla . " WHERE " . $strTabla . "_usuario = '" . $user . "'";
     }
 
+    public function verificarExistenciaEnTabla($tabla, $user){
+        $strTabla = strtolower(substr($tabla, 11));
+        return "SELECT COUNT(*) FROM " . $strTabla . " WHERE usuario = '" . $user . "'";
+
+    }
+
     private function verificarJoin($tabla) {//funcion que se encarga de verificar si se puede hacer un join de acuerdo a las llaves "id_" que se obtienen de la bd
         $verifica = $this->meta($tabla); //array q contiene todos las llaves
         $contador = 0; //contador para determinar si las llaves "id_" se repiten mas de una vez si es ese el caso indica que hay join
@@ -409,5 +415,6 @@ class SqlQuery {
         $sentencia = "UPDATE " . $strTabla . " SET clave_" . $strTabla . " =?, fch_modificacion = ? WHERE id_" . $strTabla . "=?";
         return $sentencia;
     }
+
 
 }

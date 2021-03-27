@@ -484,17 +484,18 @@ $app->post('/usuario',/*'authenticate'*/ function() use ($app) {
     include_once '../controladores/ControladorUsuarios.php';
     $consulta = new ControladorUsuarios();
     $registros = $consulta->guardar($param);        
-    
 
-    if ( is_array($param) ) {
+    if ( !isset($registros['codigo'])) {
         $response["error"] = false;
         $response["message"] = "Registro creado satisfactoriamente!";
         $response["registro"] = $param;
+        echoResponse(201, $response);
     } else {
         $response["error"] = true;
         $response["message"] = "Error al crear registro. Por favor intenta nuevamente.";
+        echoResponse(400, $response);
     }
-    echoResponse(201, $response);
+    
 });
 
 
