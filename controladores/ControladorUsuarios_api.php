@@ -16,7 +16,21 @@ class ControladorUsuarios_api extends ControladorGeneral {
         $master = new ControladorMaster();
         return $master->buscar($tabla);        
     }
+    public function existe($datosCampos) {//busca usando la clase SqlQuery
+        (string) $tabla = get_class($this); //uso el nombre de la clase que debe coincidir con la BD         
+        $master = new ControladorMaster();
+        $existe = $master->verificar($tabla,$datosCampos);           
+        return $existe;    
+        //$this->buscar();        
+    }
 
+    public function buscarPorToken($datosCampos) {//busca usando la clase SqlQuery
+        (string) $tabla = get_class($this); //uso el nombre de la clase que debe coincidir con la BD       
+        $master = new ControladorMaster();
+        $usuario = $master->porToken($tabla,$datosCampos); 
+        return $usuario;    
+                
+    }
    
     public function eliminar($id) {//elimina usando SqlQuery clase
         (string) $tabla = get_class($this); //adquiero el nombre de la clase para usar en la tabla

@@ -3,7 +3,7 @@
 require_once 'ControladorGeneral.php';
 require_once 'ControladorMaster.php';
 require_once 'SqlQuery.php';
-
+include_once '../helper/helper.php';
 
 
 
@@ -13,8 +13,14 @@ class ControladorUsuarios extends ControladorGeneral {
     
     public function buscar() {//busca usando la clase SqlQuery
         (string) $tabla = get_class($this); //uso el nombre de la clase que debe coincidir con la BD         
-        $master = new ControladorMaster();
+        $master = new ControladorMaster();        
         return $master->buscar($tabla);        
+    }
+    public function existe($datosCampos) {//busca usando la clase SqlQuery
+        (string) $tabla = get_class($this); //uso el nombre de la clase que debe coincidir con la BD         
+        $master = new ControladorMaster();
+        $master->verificar($tabla,$datosCampos);        
+        $this->buscar();        
     }
 
    
@@ -25,11 +31,12 @@ class ControladorUsuarios extends ControladorGeneral {
         return ["eliminado"=>"eliminado"];
     }
 
-    
     public function buscarUsuarioXId($dato) {//este método es el encargado de realiza la busqueda del último usuario insertado usando SqlQuery      
         (string) $tabla = get_class($this); //adquiero el nombre de la clase para usar en la tabla
         $master = new ControladorMaster();
-        return $master->buscarId($dato, $tabla);
+        $array = $master->buscarUsuarioId($dato, $tabla);
+        $limpio = limpiarConraseña($array);
+        return $limpio;
     }
 
     public function guardar($datosCampos) {//funcion guardar con SqlQuery implementado

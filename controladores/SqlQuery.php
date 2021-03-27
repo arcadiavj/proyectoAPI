@@ -1,6 +1,7 @@
 <?php
 
 require_once '../persistencia/ControladorPersistencia.php'; //utilizo para la conexion
+include_once '../helper/helper.php';
 //require_once 'ControladorEscritura.php';
 
 /**
@@ -146,7 +147,8 @@ class SqlQuery {
                 }
             }
         }
-        return $array; //regreso el array
+        $limpio = limpiarConraseñaArray($array);
+        return $limpio; //regreso el array
     }
 
     public function armarSentencia($arrayCabecera, $tabla) {//ésta es la funcion encargada de generar la sentencia agregar en la base de datos
@@ -271,6 +273,19 @@ class SqlQuery {
         return $consulta; //regreso la consulta
     }
 
+    public function buscarUsuarioId($dato, $tabla) {//sirve para generar la sentencia que se encarga de buscar un id en la tabla 
+        $strTabla = strtolower(substr($tabla, 11)); //al obtener de la clase el nombre de la clase de digo que quiero que parta la palabra controlador y me haga la consulta con el nombre del formulario
+        $consulta = "SELECT * FROM " . $strTabla . " WHERE proveedor = " . $dato." AND rol = 5"; //ésta es la consulta ensambalda... tambien se prodria utilizar unida a un INNER JOIN todavía al momento de escribir esto todavía estoy pensando como hacerlo ;)
+        return $consulta; //regreso la consulta
+    }
+
+
+    public function porToken($tabla, $dato) {//sirve para generar la sentencia que se encarga de buscar un id en la tabla 
+        $strTabla = strtolower(substr($tabla, 11)); //al obtener de la clase el nombre de la clase de digo que quiero que parta la palabra controlador y me haga la consulta con el nombre del formulario
+        $consulta = "SELECT usuario FROM " . $strTabla . " WHERE token = '" . $dato['token']."'"; //ésta es la consulta ensambalda... tambien se prodria utilizar unida a un INNER JOIN todavía al momento de escribir esto todavía estoy pensando como hacerlo ;)
+        return $consulta; //regreso la consulta
+    }
+
     private function buscarInnerJoin($tabla, $id, $campo) {//Ésta función esta todavía en fase de prueba... en realidad lo que me gustaria hacer es ver si en lugar de pasar una tabla secundaria pudiera generar un array para poder pasar los datos de la vista... de esa manera podría leer las todos lo elementos que vienen en el array para poder armar la consulta °¬)
         $array = $this->meta($tabla); //armo el array para buscar las relaciones de la tabla
         $arrLlaveNum = $this->llaveNumerica($array); //cambio el array que obtengo desde la meta y lo convierto en numero para pasarlo por el for        
@@ -302,10 +317,12 @@ class SqlQuery {
 
     public function verificarExistencia($tabla, $dato) {//esta funcion verifica si existe un campo especifico en la BD
         $array = $this->meta($tabla); //Traigo los datos de la BD        
-        $arrayString = $this->arrayString($array); //ordeno los datos sacando el ID del array
+        //$arrayString = $this->arrayString($array); //ordeno los datos sacando el ID del array
         $strTabla = strtolower(substr($tabla, 11)); //paso a miniscula el nombre de la tabla
-        $consulta = "SELECT COUNT(*) FROM " . $strTabla . " WHERE " .
-                $arrayString . " = '" . $dato . "'"; //genero la consulta con los datos 
+        if($strTabla != 'usuarios_api'){
+            $strTabla = 'usuarios_api';
+        }
+        $consulta = "SELECT COUNT(*) FROM " . $strTabla . " WHERE token = '" . $dato['token'] . "'"; //genero la consulta con los datos 
         return $consulta; //regreso la consulta ^~)
     }
 
@@ -336,6 +353,7 @@ class SqlQuery {
         foreach ($array as $llave => $val) {//ingresa al foreach para recorrer el array
             if ($i == 1 && $val == "campo") {//verifica si es el 2 campo y si el contenido del mismo es campo ... ingreso y asigno los valores correspondientes al array
                 $string = $llave; // el string que quiero devolver ;)
+                
                 break; //termino el ciclo ya tengo el dato que necesito
             } else if ($i == 1) {//sino :]
                 $string = $val; // en este caso asigno el string lo cargo con el valor del campo porque es el que viene de la vista

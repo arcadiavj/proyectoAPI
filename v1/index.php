@@ -16,7 +16,7 @@ header("Access-Control-Allow-Headers: X-Requested-With");
 header('Content-Type: text/html; charset=utf-8');
 header('P3P: CP="IDC DSP COR CURa ADMa OUR IND PHY ONL COM STA"'); 
 
-
+include_once '../helper/helper.php';
 require '../libs/Slim/Slim.php'; 
 \Slim\Slim::registerAutoloader(); 
 $app = new \Slim\Slim();//instancia del framework
@@ -250,13 +250,15 @@ $app->get('/provincias', function() {
     $response = array();
     include_once '../controladores/ControladorUbicacion_provincias.php';
     $consulta = new ControladorUbicacion_provincias();
-    $registros = $consulta->buscar();    
-    $response["error"] = false;
-    $response["status"] = 200;
-    $response["message"] = "Registros Guardados: " . count($registros); //podemos usar count() para conocer el total de valores de un array
-    $response["registros"] = $registros;
+    $registros = $consulta->buscar();  
+    var_dump($registros);  
+    //$response["error"] = false;
+    //$response["status"] = 200;
+    //$response["message"] = "Registros Guardados: " . count($registros); //podemos usar count() para conocer el total de valores de un array
+    //$response["registros"] = $registros;
 
-    echoResponse(200, $response);
+    //echoResponse(200, $response);
+    return $registros;
 });
 
 $app->get('/vistaBonificaciones', function() {
@@ -285,24 +287,50 @@ $app->get('/vistaNotificaciones', function() {
     echoResponse(200, $response);
 });
 
-$app->get('/usuarios', function() {
+$app->get('/usuarios(/:id)', function($id=null) use ($app){
     $response = array();
-    include_once '../controladores/ControladorUsuarios.php';
-    $consulta = new ControladorUsuarios();
-    $registros = $consulta->buscar();    
+    $header = $app->request->headers();
+    if( $id == null ){
+        echo 'estoy aca';
+        $app->redirect('usuariosApi');
+    }else{
+        include_once '../controladores/ControladorUsuarios.php';
+        $consulta = new ControladorUsuarios();
+        $registros = $consulta->buscarUsuarioXId($id);
+        $provincias = buscarProvincias();
+
+    }
+    if(isset( $registros["error"]) == false){
+        //echo 'aca estoy';
+        //$registros = $app->redirect('provincias');
+    }
+    //$registros = $consulta->buscar();    
     $response["error"] = false;
     $response["status"] = 200;
     $response["message"] = "Registros Guardados: " . count($registros); //podemos usar count() para conocer el total de valores de un array
     $response["registros"] = $registros;
+    $response["provincias"] = $provincias;
 
     echoResponse(200, $response);
 });
 
-$app->get('/usuariosApi', function() {
+$app->get('/usuariosApi', function() use ($app) {
+    $header = $app->request->headers();
+    $datos = array('token'=>$header['token']);
     $response = array();
     include_once '../controladores/ControladorUsuarios_api.php';
-    $consulta = new ControladorUsuarios_api();
-    $registros = $consulta->buscar();    
+    $consulta = new ControladorUsuarios_api();  
+    $registros = $consulta->existe($datos); 
+   if ($registros[0]['COUNT(*)'] == 1){
+       $id = $consulta->buscarPorToken($datos);
+       $app->redirect('usuarios/'.$id[0]['usuario']);
+    //$app->$response->withRedirect($this->router->pathFor('usuarios', ['id' => 99]));
+   }else{
+    $response["error"] = true;
+    $response["status"] = 404;
+    echoResponse(404, $response);
+    $app->stop();
+   };
     $response["error"] = false;
     $response["status"] = 200;
     $response["message"] = "Registros Guardados: " . count($registros); //podemos usar count() para conocer el total de valores de un array
@@ -400,8 +428,6 @@ $app->post('/contableRes',/*'authenticate'*/ function() use ($app) {
     /*capturamos los parametros recibidos y los almacenamos como un nuevo array asociativo 
     para poder enviarlos a la BD*/    
     $param = $app->request->Post();
-    validarCorreo($param['correo']);
-    //$app->stop();    
     
     /* llamamos al metodo que almacene el nuevo dato, por ejemplo: */
     include_once '../controladores/ControladorContable_resumen.php';
@@ -430,6 +456,33 @@ $app->post('/notificacion',/*'authenticate'*/ function() use ($app) {
     /* llamamos al metodo que almacene el nuevo dato, por ejemplo: */
     include_once '../controladores/ControladorNotificaciones.php';
     $consulta = new ControladorNotificaciones();
+    $registros = $consulta->guardar($param);        
+    
+
+    if ( is_array($param) ) {
+        $response["error"] = false;
+        $response["message"] = "Registro creado satisfactoriamente!";
+        $response["registro"] = $param;
+    } else {
+        $response["error"] = true;
+        $response["message"] = "Error al crear registro. Por favor intenta nuevamente.";
+    }
+    echoResponse(201, $response);
+});
+
+$app->post('/usuario',/*'authenticate'*/ function() use ($app) {
+    // check for required params
+    //verifyRequiredParams(array());
+    $header = $app->request->headers();
+    $response = array();
+    /*capturamos los parametros recibidos y los almacenamos como un nuevo array asociativo 
+    para poder enviarlos a la BD*/    
+    $param = $app->request->Post();        
+    $param['token'] = $header['token'];
+    //var_dump($param);
+    /* llamamos al metodo que almacene el nuevo dato, por ejemplo: */
+    include_once '../controladores/ControladorUsuarios.php';
+    $consulta = new ControladorUsuarios();
     $registros = $consulta->guardar($param);        
     
 
@@ -513,13 +566,3 @@ function echoResponse($status_code, $response) {
     echo json_encode($response);
 }
 
-
-function validarCorreo($correo){
-
-    if ($correo){
-        echo "no es un correo valido";
-    }else{
-        return;
-    }
-
-}

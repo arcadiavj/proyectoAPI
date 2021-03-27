@@ -58,7 +58,7 @@ class ControladorMaster {
     public function guardar($tabla, $datosCampos) {
         $guardar = new SqlQuery();
         $existe = $this->verificar($tabla, $datosCampos);
-        if ($existe[0] == '0') {//solamente si el usuario no existe se comienza con la carga a la BD
+        if ($existe[0]['COUNT(*)'] == '1') {//solamente si el usuario no existe se comienza con la carga a la BD
             try {
                 $this->refControladorPersistencia->get_conexion()->beginTransaction();  //comienza la transacción
                 $arrayCabecera = $guardar->meta($tabla); //armo la cabecera del array con los datos de la tabla de BD
@@ -79,6 +79,7 @@ class ControladorMaster {
                 echo $exc->getTraceAsString();
                 $this->refControladorPersistencia->get_conexion()->rollBack();  //si hay algún error hace rollback
             }
+            var_dump($id);
             $respuesta = $this->getUsuario($id, $tabla); //busco el usuario
             return $respuesta; //regreso
         } else {
@@ -147,6 +148,27 @@ class ControladorMaster {
         }
     }
 
+
+    public function buscarUsuarioId($dato, $tabla) {
+        $buscar = new SqlQuery();
+        try {
+            $this->refControladorPersistencia->get_conexion()->beginTransaction();
+            $usuarioConsulta = $this->refControladorPersistencia->ejecutarSentencia(
+                    $buscar->buscarUsuarioId($dato, $tabla));
+            $arrayUsuario = $usuarioConsulta->fetchAll(PDO::FETCH_ASSOC); //utilizo el FETCH_ASSOC para que no repita los campos
+            $this->refControladorPersistencia->get_conexion()->commit(); //realizo el commit para obtener los datos
+            return $arrayUsuario; //regreso el array de usuario que necesito para mostrar los datos que han sido almacenados en la base de datos.
+        } catch (PDOException $excepcionPDO) {
+            echo "<br>Error PDO: " . $excepcionPDO->getTraceAsString() . '<br>';
+            $this->refControladorPersistencia->get_conexion()->rollBack(); //si salio mal hace un rollback
+        } catch (Exception $exc) {
+            echo $exc->getTraceAsString();
+            $this->refControladorPersistencia->get_conexion()->rollBack();  //si hay algún error hace rollback
+        }
+    }
+
+
+
     public function bucarUltimo($tabla) {
         $ultimo = new SqlQuery();
         try {
@@ -210,16 +232,38 @@ class ControladorMaster {
                 $rtaVerifUser = $this->refControladorPersistencia->ejecutarSentencia(
                         $verifica->verificarExistenciaUsuario($tabla, $datosCampos["usuario"])); //verifico existencia de usuairo
             } else {
-
                 $rtaVerifUser = $this->refControladorPersistencia->ejecutarSentencia(
-                        $verifica->verificarExistencia($tabla, $datosCampos[$this->getCampo($datosCampos)])); //verifico si ya hay un usuario con ese nombre 
-            }
-            $existe = $rtaVerifUser->fetch(); //paso a un array
+                    $verifica->verificarExistencia($tabla, $datosCampos));
+                        //$verifica->verificarExistencia($tabla, $datosCampos[$this->getCampo($datosCampos)])); //verifico si ya hay un usuario con ese nombre 
+            
+                    }
+                    //$user = $statement->fetchAll(PDO::FETCH_ASSOC);
+            $existe = $rtaVerifUser->fetchAll(PDO::FETCH_ASSOC); //paso a un array
             $this->refControladorPersistencia->get_conexion()->commit(); //cierro
         } catch (PDOException $excepcionPDO) {
             echo "<br>Error PDO: " . $excepcionPDO->getTraceAsString() . '<br>';
             $this->refControladorPersistencia->get_conexion()->rollBack(); //si salio mal hace un rollback
-        }return $existe;
+        }
+        return $existe;
+    }
+
+
+    public function porToken($tabla, $datos) {
+        $buscar = new SqlQuery();
+        try {
+            $this->refControladorPersistencia->get_conexion()->beginTransaction(); //comienza la transacción
+            $statement = $this->refControladorPersistencia->ejecutarSentencia(
+                    $buscar->porToken($tabla,$datos)); //senencia armada desde la clase SqlQuery sirve para comenzar la busqueda
+                    $array = $statement->fetchAll(PDO::FETCH_ASSOC); //retorna un array asociativo para no duplicar datos
+            $this->refControladorPersistencia->get_conexion()->commit(); //si todo salió bien hace el commit            
+            return $array; //regreso el array para poder mostrar los datos en la vista... con Ajax... y dataTable de JavaScript
+        } catch (PDOException $excepcionPDO) {
+            echo "<br>Error PDO: " . $excepcionPDO->getTraceAsString() . '<br>';
+            $this->refControladorPersistencia->get_conexion()->rollBack(); //si salio mal hace un rollback
+        } catch (Exception $exc) {
+            echo $exc->getTraceAsString();
+            $this->refControladorPersistencia->get_conexion()->rollBack(); //si salio mal hace un rollback
+        }
     }
 
 }
