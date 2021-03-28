@@ -297,7 +297,6 @@ $app->get('/usuarios(/:id)', function($id=null) use ($app){
         $consulta = new ControladorUsuarios();
         $registros = $consulta->buscarUsuarioXId($id);
         $provincias = buscarProvincias();
-
     }
     if(isset( $registros["error"]) == false){
         //echo 'aca estoy';

@@ -275,7 +275,11 @@ class SqlQuery {
 
     public function buscarUsuarioId($dato, $tabla) {//sirve para generar la sentencia que se encarga de buscar un id en la tabla 
         $strTabla = strtolower(substr($tabla, 11)); //al obtener de la clase el nombre de la clase de digo que quiero que parta la palabra controlador y me haga la consulta con el nombre del formulario
-        $consulta = "SELECT * FROM " . $strTabla . " WHERE proveedor = " . $dato." AND rol = 5"; //ésta es la consulta ensambalda... tambien se prodria utilizar unida a un INNER JOIN todavía al momento de escribir esto todavía estoy pensando como hacerlo ;)
+        //$consulta = "SELECT * FROM " . $strTabla . " WHERE proveedor = " . $dato." AND rol = 5"; //ésta es la consulta ensambalda... tambien se prodria utilizar unida a un INNER JOIN todavía al momento de escribir esto todavía estoy pensando como hacerlo ;)
+        $consulta = "SELECT * FROM " . $strTabla . " INNER JOIN paquetes_usuarios";
+        $consulta .= " ON usuarios.id = paquetes_usuarios.usuario ";
+        $consulta .= " INNER JOIN paquetes ON paquetes_usuarios.paquete = paquetes.id ";
+        $consulta .= " WHERE proveedor = ". $dato." AND rol = 5";
         return $consulta; //regreso la consulta
     }
 
