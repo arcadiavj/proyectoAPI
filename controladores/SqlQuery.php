@@ -248,8 +248,8 @@ class SqlQuery {
 
     public function eliminar($tabla, $id) {//está demás decir para que sirve esta función ... todavía basica... pero funcional
         $fecha = $this->fecha(); // desde aquí llamo a la función fecha... que sirve para ingresar la fecha con el formato correspondiente en la BD
-        $strTabla = substr($tabla, 11); //al obtener de la clase el nombre de la clase de digo que quiero que parta la palabra controlador y me haga la consulta con el nombre del formulario
-        $consulta = "UPDATE " . $strTabla . " SET fch_baja = '" . $fecha . "' WHERE id_" . $strTabla . " =" . $id; // se genera la sentencia..
+        $strTabla = strtolower(substr($tabla, 11)); //al obtener de la clase el nombre de la clase de digo que quiero que parta la palabra controlador y me haga la consulta con el nombre del formulario
+        $consulta = "UPDATE " . $strTabla . " SET estado = '1' WHERE id =" . $id; // se genera la sentencia..
         return $consulta; //regreso la consula... '(
     }
 

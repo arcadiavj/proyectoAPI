@@ -251,7 +251,6 @@ $app->get('/provincias', function() {
     include_once '../controladores/ControladorUbicacion_provincias.php';
     $consulta = new ControladorUbicacion_provincias();
     $registros = $consulta->buscar();  
-    var_dump($registros);  
     //$response["error"] = false;
     //$response["status"] = 200;
     //$response["message"] = "Registros Guardados: " . count($registros); //podemos usar count() para conocer el total de valores de un array
@@ -495,6 +494,33 @@ $app->post('/usuario',/*'authenticate'*/ function() use ($app) {
         $response["message"] = "Error al crear registro. Por favor intenta nuevamente.";
         echoResponse(400, $response);
     }
+    
+});
+
+$app->delete('/usuario/:id', function ($id) use ($app) {
+    
+    $header = $app->request->headers();
+    $response = array();  
+    $datos = array('token'=>$header['token']);   
+    include_once '../controladores/ControladorUsuarios_api.php';
+    $consulta = new ControladorUsuarios_api();  
+    $registros = $consulta->existe($datos); 
+   if ($registros[0]['COUNT(*)'] == 1){
+    include_once '../controladores/ControladorUsuarios.php';
+    $consulta = new ControladorUsuarios();
+    $registros = $consulta->eliminar($id);
+    
+    if(isset($registros['eliminado'])){
+        $response["error"] = false;
+        $response["message"] = "Registro ".$id." eliminado satisfactoriamente!";
+        echoResponse(201, $response);
+    }else{
+        $response["error"] = true;
+        $response["message"] = "Registro ".$id." no se encuentra!";
+        echoResponse(400, $response);
+    }
+   }
+
     
 });
 

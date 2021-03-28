@@ -45,8 +45,7 @@ class ControladorUsuarios extends ControladorGeneral {
         $usuario = $master->verificarExistenciaEnTabla($tabla, $datosCampos['usuario']);
         if($usuario['0']['COUNT(*)'] == '0'){
             return $master->guardar($tabla,$datosCampos);
-        }else{
-            
+        }else{            
             return $respuesta = array("codigo" => '400');
         }
                  
