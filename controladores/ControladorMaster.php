@@ -288,4 +288,22 @@ class ControladorMaster {
         return $existe;
     }
 
+    public function buscarPaqueteProveedor($tabla, $dato){
+        $buscar = new SqlQuery();
+        try {
+            $this->refControladorPersistencia->get_conexion()->beginTransaction(); //comienza la transacción
+            $statement = $this->refControladorPersistencia->ejecutarSentencia(
+                    $buscar->buscarPaqueteProveedor($tabla, $dato)); //senencia armada desde la clase SqlQuery sirve para comenzar la busqueda
+            $array = $statement->fetchAll(PDO::FETCH_ASSOC); //retorna un array asociativo para no duplicar datos
+            $this->refControladorPersistencia->get_conexion()->commit(); //si todo salió bien hace el commit            
+            return $array; //regreso el array para poder mostrar los datos en la vista... con Ajax... y dataTable de JavaScript
+        } catch (PDOException $excepcionPDO) {
+            echo "<br>Error PDO: " . $excepcionPDO->getTraceAsString() . '<br>';
+            $this->refControladorPersistencia->get_conexion()->rollBack(); //si salio mal hace un rollback
+        } catch (Exception $exc) {
+            echo $exc->getTraceAsString();
+            $this->refControladorPersistencia->get_conexion()->rollBack(); //si salio mal hace un rollback
+        }
+    }
+
 }

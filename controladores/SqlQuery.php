@@ -283,6 +283,15 @@ class SqlQuery {
         return $consulta; //regreso la consulta
     }
 
+    public function buscarPaqueteProveedor($tabla,$dato) {//sirve para generar la sentencia que se encarga de buscar un id en la tabla 
+        $strTabla = strtolower(substr($tabla, 11)); //al obtener de la clase el nombre de la clase de digo que quiero que parta la palabra controlador y me haga la consulta con el nombre del formulario
+        //$consulta = "SELECT * FROM " . $strTabla . " WHERE proveedor = " . $dato." AND rol = 5"; //ésta es la consulta ensambalda... tambien se prodria utilizar unida a un INNER JOIN todavía al momento de escribir esto todavía estoy pensando como hacerlo ;)
+        $consulta = "SELECT * FROM paquetes_proveedores INNER JOIN paquetes"; 
+        $consulta .=" ON paquetes_proveedores.paquete = paquetes.id";
+        $consulta.= " WHERE proveedor =".$dato[0]['usuario'];        
+        return $consulta; //regreso la consulta
+    }
+
 
     public function porToken($tabla, $dato) {//sirve para generar la sentencia que se encarga de buscar un id en la tabla 
         $strTabla = strtolower(substr($tabla, 11)); //al obtener de la clase el nombre de la clase de digo que quiero que parta la palabra controlador y me haga la consulta con el nombre del formulario

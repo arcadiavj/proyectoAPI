@@ -49,8 +49,12 @@ class ControladorPaquetes extends ControladorGeneral {
         $master = new ControladorMaster();
         return $master->modificar($tabla, $datosCampos);
     }
+    public function buscarPaqueteProveedor($id) {//busca usando la clase SqlQuery
+        (string) $tabla = get_class($this); //uso el nombre de la clase que debe coincidir con la BD         
+        $master = new ControladorMaster();
+        return $master->buscarPaqueteProveedor($tabla, $id);        
+    }
     
-
     
 
 }
