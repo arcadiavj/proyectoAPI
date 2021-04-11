@@ -307,14 +307,15 @@ $app->get('/usuarios(/:id)', function($id=null) use ($app){
     $response = array();
     $header = $app->request->headers();
     if( $id == null ){
-        echo 'estoy aca';
         $app->redirect('usuariosApi');
     }else{
         include_once '../controladores/ControladorUsuarios.php';
         $consulta = new ControladorUsuarios();
         $registros = $consulta->buscarUsuarioXId($id);
-        $provincias = buscarProvincias();
+        $provincias = $consulta->buscarProvincias($registros);
+        $paquetes = $consulta->buscarPaquetes($registros);
     }
+    $registros= arrayProvincias($registros, $provincias);
     if(isset( $registros["error"]) == false){
         //echo 'aca estoy';
         //$registros = $app->redirect('provincias');
@@ -324,7 +325,6 @@ $app->get('/usuarios(/:id)', function($id=null) use ($app){
     $response["status"] = 200;
     $response["message"] = "Registros Guardados: " . count($registros); //podemos usar count() para conocer el total de valores de un array
     $response["registros"] = $registros;
-    $response["provincias"] = $provincias;
 
     echoResponse(200, $response);
 });
@@ -545,7 +545,13 @@ $app->post('/paquete', function() use($app){
     echoResponse(200, $response);
 });
 
-$app->delete('/usuario/:id', function ($id) use ($app) {
+
+/* Crear rutas con metodo DELETE para eliminar datos logicamente desde la API
+    ver que metodo de autenticacion se va a utilizar
+    como se van a traer los datos desde la vista etc...
+    la siguiente función es a modo de ejemplo
+*/
+$app->put('/usuario/:id', function ($id, $estado) use ($app) {
     
     $header = $app->request->headers();
     $response = array();  
@@ -572,10 +578,91 @@ $app->delete('/usuario/:id', function ($id) use ($app) {
     
 });
 
+$app->put('/paquete/:id', function ($id) use ($app) {
+    $header = $app->request->headers();
+    $response = array();  
+    $datos = array('token'=>$header['token']);   
+    include_once '../controladores/ControladorUsuarios_api.php';
+    $consulta = new ControladorUsuarios_api();  
+    $registros = $consulta->existe($datos); 
+   if ($registros[0]['COUNT(*)'] == 1){
+    include_once '../controladores/ControladorPaquetes.php';
+    $consulta = new ControladorPaquetes();
+    $registros = $consulta->eliminar($id);
+    
+    if(isset($registros['eliminado'])){
+        $response["error"] = false;
+        $response["message"] = "Registro ".$id." eliminado satisfactoriamente!";
+        echoResponse(201, $response);
+    }else{
+        $response["error"] = true;
+        $response["message"] = "Registro ".$id." no se encuentra!";
+        echoResponse(400, $response);
+    }
+   }
+   });
+
+/* Crear rutas con metodo PUT o PATCH  a definir  para actualizar datos desde la API
+    ver que metodo de autenticacion se va a utilizar
+    como se van a traer los datos desde la vista etc...
+    la siguiente función es a modo de ejemplo
+*/
+$app->patch('/usuario/:id', function ($id) use ($app) {
+    $header = $app->request->headers();
+    $response = array();  
+    $datos = array('token'=>$header['token']);   
+    include_once '../controladores/ControladorUsuarios_api.php';
+    $consulta = new ControladorUsuarios_api();  
+    $registros = $consulta->existe($datos); 
+   if ($registros[0]['COUNT(*)'] == 1){
+    include_once '../controladores/ControladorUsuario.php';
+    $consulta = new ControladorUsuario();
+    $registros = $consulta->modificar($id);
+    
+    if(isset($registros['token'])){
+        $response["error"] = false;
+        $response["message"] = "Registro ".$id." eliminado satisfactoriamente!";
+        echoResponse(201, $response);
+    }else{
+        $response["error"] = true;
+        $response["message"] = "Registro ".$id." no se encuentra!";
+        echoResponse(400, $response);
+    }
+   }
+   });
+
+
+   $app->patch('/paquete/:id', function ($id) use ($app) {
+    $header = $app->request->headers();
+    $response = array();  
+    $datos = array('token'=>$header['token']);   
+    include_once '../controladores/ControladorUsuarios_api.php';
+    $consulta = new ControladorUsuarios_api();  
+    $registros = $consulta->existe($datos); 
+   if ($registros[0]['COUNT(*)'] == 1){
+    include_once '../controladores/ControladorPaquete.php';
+    $consulta = new ControladorPaquete();
+    $registros = $consulta->modificar($id);
+    
+    if(isset($registros['error'])){
+        $response["error"] = false;
+        $response["message"] = "Registro ".$id." eliminado satisfactoriamente!";
+        echoResponse(201, $response);
+    }else{
+        $response["error"] = true;
+        $response["message"] = "Registro ".$id." no se encuentra!";
+        echoResponse(400, $response);
+    }
+   }
+   });
 
 
 
-/* corremos la aplicación */
+
+
+
+
+   /* corremos la aplicación */
 $app->run();
 
 /*********************** USEFULL FUNCTIONS **************************************/
@@ -643,3 +730,11 @@ function echoResponse($status_code, $response) {
     echo json_encode($response);
 }
 
+/**
+ * 
+ * public function contrasenaCrear($cadena){
+		$cadena = mb_strtoupper($cadena);
+		return ( strlen($cadena)>0 ) ? md5($cadena) : NULL;
+	}
+ * 
+ */

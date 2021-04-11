@@ -429,5 +429,24 @@ class SqlQuery {
         return $sentencia;
     }
 
+    public function buscarLocalidad($dato){
+        //$strTabla = strtolower(substr($tabla, 11));
+        $consulta = "SELECT ubicacion_provincias.nombre, ubicacion_ciudades.nombre, ubicacion_localidades.nombre FROM ubicacion_provincias"; 
+        $consulta .=" INNER JOIN ubicacion_ciudades ";
+        $consulta.= "ON ubicacion_provincias.id = ubicacion_ciudades.provincia";
+        $consulta.= " INNER JOIN ubicacion_localidades ";
+        $consulta.= " ON ubicacion_ciudades.id=ubicacion_localidades.ciudad";  
+        $consulta.= " WHERE	ubicacion_localidades.id =".$dato;
+        return $consulta;
+    }
+    public function buscarPaquete($dato){
+        //$strTabla = strtolower(substr($tabla, 11));
+        $consulta = "SELECT * FROM paquetes_usuarios"; 
+        $consulta .=" INNER JOIN paquetes ";
+        $consulta.= "ON paquetes_usuarios.paquete = paquetes.id";
+        $consulta.= " WHERE paquetes_usuarios.usuario =".$dato;
+        return $consulta;
+    }
+
 
 }

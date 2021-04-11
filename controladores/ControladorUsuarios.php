@@ -65,6 +65,33 @@ class ControladorUsuarios extends ControladorGeneral {
     }
     
 
+    public function buscarProvincias($datosCampos){
+        $resultados = array();
+        $guardar = new SqlQuery(); //instancio objeto de la clase sqlQuery
+        (string) $tabla = get_class($this); //obtengo el nombre de la clase para poder realizar la consulta
+        $master = new ControladorMaster();
+        foreach ($datosCampos as $key => $value) {
+            if($value['localidad'] == null){
+                $value['localidad'] = '1';
+            };
+            $resultados[$value['localidad']] = $master->buscarLocalidad($value['localidad']);
+        }
+        return $resultados;
+    }
     
+    public function buscarPaquetes($datosCampos){
+        $resultados = array();
+        $guardar = new SqlQuery(); //instancio objeto de la clase sqlQuery
+        (string) $tabla = get_class($this); //obtengo el nombre de la clase para poder realizar la consulta
+        $master = new ControladorMaster();
+        foreach ($datosCampos as $key => $value) {
+            if($value['paquete'] == null){
+                $value['paquete'] = '1';
+            };
+            $resultados[$value['paquete']] = $master->buscarPaquetes($value['paquete']);
+        }
+        
+        return $resultados;
+    }
 
 }

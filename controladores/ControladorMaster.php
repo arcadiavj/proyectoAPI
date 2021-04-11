@@ -148,7 +148,45 @@ class ControladorMaster {
         }
     }
 
+    public function buscarLocalidad($dato){
+        $buscar = new SqlQuery();
+        $tabla = 'ControladorProvincias' ;
+        try {
+            $this->refControladorPersistencia->get_conexion()->beginTransaction();
+            $usuarioConsulta = $this->refControladorPersistencia->ejecutarSentencia(
+                    $buscar->buscarLocalidad($dato));
+            $arrayUsuario = $usuarioConsulta->fetchAll(PDO::FETCH_NAMED); //utilizo el FETCH_ASSOC para que no repita los campos
+            //var_dump($arrayUsuario);
+            $this->refControladorPersistencia->get_conexion()->commit(); //realizo el commit para obtener los datos
+            return $arrayUsuario; //regreso el array de usuario que necesito para mostrar los datos que han sido almacenados en la base de datos.
+        } catch (PDOException $excepcionPDO) {
+            echo "<br>Error PDO: " . $excepcionPDO->getTraceAsString() . '<br>';
+            $this->refControladorPersistencia->get_conexion()->rollBack(); //si salio mal hace un rollback
+        } catch (Exception $exc) {
+            echo $exc->getTraceAsString();
+            $this->refControladorPersistencia->get_conexion()->rollBack();  //si hay algún error hace rollback
+        }
+    }    
 
+    public function buscarPaquetes($dato){
+        $buscar = new SqlQuery();
+        $tabla = 'ControladorProvincias' ;
+        try {
+            $this->refControladorPersistencia->get_conexion()->beginTransaction();
+            $usuarioConsulta = $this->refControladorPersistencia->ejecutarSentencia(
+                    $buscar->buscarPaquete($dato));
+            $arrayUsuario = $usuarioConsulta->fetchAll(PDO::FETCH_NAMED); //utilizo el FETCH_ASSOC para que no repita los campos
+            var_dump($arrayUsuario);
+            $this->refControladorPersistencia->get_conexion()->commit(); //realizo el commit para obtener los datos
+            return $arrayUsuario; //regreso el array de usuario que necesito para mostrar los datos que han sido almacenados en la base de datos.
+        } catch (PDOException $excepcionPDO) {
+            echo "<br>Error PDO: " . $excepcionPDO->getTraceAsString() . '<br>';
+            $this->refControladorPersistencia->get_conexion()->rollBack(); //si salio mal hace un rollback
+        } catch (Exception $exc) {
+            echo $exc->getTraceAsString();
+            $this->refControladorPersistencia->get_conexion()->rollBack();  //si hay algún error hace rollback
+        }
+    }  
     public function buscarUsuarioId($dato, $tabla) {
         $buscar = new SqlQuery();
         try {
