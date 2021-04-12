@@ -330,6 +330,17 @@ $app->get('/usuarios(/:id)', function($id=null) use ($app){
 });
 
 $app->get('/usuariosApi', function() use ($app) {
+    include_once '../model/usuario.php';
+    $pepe = new Usuario_model( /*'$id' , '$alta' , 'usuario', 'contrasena', 
+    'correo', 'idproveedor', 'proveedor', 'cuit' , 'dni', 'nombre' , 'apellido' , 'domicilio' , 'pais' ,
+     'provincia' , 'iudad' , 'localidad', 'telefono1' , 'telefono2' , 'estado' , 'plataforma' , 'idtiki', 
+    'paquetes'*/ );
+    $pepe->setUsuario('$id' , '$alta' , 'usuario', 'contrasena', 
+    'correo', 'idproveedor', 'proveedor', 'cuit' , 'dni', 'nombre' , 'apellido' , 'domicilio' , 'pais' ,
+     'provincia' , 'iudad' , 'localidad', 'telefono1' , 'telefono2' , 'estado' , 'plataforma' , 'idtiki', 
+    'paquetes');
+    echo $pepe->getUsuario();
+
     $header = $app->request->headers();
     $datos = array('token'=>$header['token']);
     $response = array();
@@ -738,3 +749,4 @@ function echoResponse($status_code, $response) {
 	}
  * 
  */
+
