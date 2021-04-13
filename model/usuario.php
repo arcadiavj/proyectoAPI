@@ -51,7 +51,7 @@ class Usuario_model {
         $this->$paquete = $paquete;*/
     }
 
-    public function setUsuario($id, $alta, $usuario, $contrasena, $correo, $idproveedor, $proveedor, $cuit,
+    /*public function setUsuario($id, $alta, $usuario, $contrasena, $correo, $idproveedor, $proveedor, $cuit,
     $dni, $nombre, $apellido, $domicilio, $pais, $provincia, $ciudad, $localidad, $telefono1, $telefono2,
     $estado, $plataforma, $idtiki, $paquetes){
         $this->$id = $id;
@@ -76,7 +76,7 @@ class Usuario_model {
         $this->$plataforma = $plataforma;
         $this->$idtiki = $idtiki;
         $this->$paquete = $paquete;
-    }
+    }*/
 
     public function getUsuario(){
         return $this->$id;
