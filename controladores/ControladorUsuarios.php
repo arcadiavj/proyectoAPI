@@ -39,11 +39,38 @@ class ControladorUsuarios extends ControladorGeneral {
         return $limpio;
     }
 
+    
+    public function buscarUsuario($dato){
+    (string) $tabla = get_class($this); //adquiero el nombre de la clase para usar en la tabla
+        $master = new ControladorMaster();
+        $array = $master->buscarUsuario($dato, $tabla);
+        $limpio = limpiarConraseña($array);
+        return $limpio;
+    }
+
     public function guardar($datosCampos) {//funcion guardar con SqlQuery implementado
+        $token = $datosCampos['token'];
         (string) $tabla = get_class($this); //obtengo el nombre de la clase para poder realizar la consulta
         $master = new ControladorMaster();
+        $sql = new SqlQuery();
+        $arrayMaestro = $sql->meta($tabla);
+        array_shift($arrayMaestro);
+        $datosCampos = compararVista($arrayMaestro, $datosCampos);
+        $datosCampos['token'] = $token;
+        var_dump($datosCampos);
+        $datosCampos['contrasena'] = contrasena($datosCampos['contrasena']);
+        $datosCampos['alta']=fecha();
+       
         $usuario = $master->verificarExistenciaEnTabla($tabla, $datosCampos['usuario']);
         if($usuario['0']['COUNT(*)'] == '0'){
+            require_once '../services/tiki.php';
+            $tiki = new TikiLive();
+            $guardar = $tiki->usuarioNuevo($datosCampos['usuario'],
+            $datosCampos['contrasena'],$datosCampos['correo'],
+            $datosCampos['nombre'],$datosCampos['apellido'],
+            $datosCampos['estado']);
+            $datosCampos['idtiki'] = $guardar;
+            //$array = limpiarIndiceToken($datosCampos);
             return $master->guardar($tabla,$datosCampos);
         }else{            
             return $respuesta = array("codigo" => '400');

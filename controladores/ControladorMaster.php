@@ -58,13 +58,22 @@ class ControladorMaster {
     public function guardar($tabla, $datosCampos) {
         $guardar = new SqlQuery();        
         $existe = $this->verificar($tabla, $datosCampos);
+       // var_dump($existe);
+       if(isset($datosCampos['token'])){
+        $array = limpiarIndiceToken($datosCampos);
+       }
+        
+        
+        var_dump($datosCampos);
         if ($existe[0]['COUNT(*)'] == '1') {//solamente si el usuario no existe se comienza con la carga a la BD
             try {
                 $this->refControladorPersistencia->get_conexion()->beginTransaction();
                   //comienza la transacción
                 $arrayCabecera = $guardar->meta($tabla); //armo la cabecera del array con los datos de la tabla de BD
                 $sentencia = $guardar->armarSentencia($arrayCabecera, $tabla); //armo la sentencia
-                $array = $guardar->armarArray($arrayCabecera, $datosCampos); //armo el array con los datos de la vista y los datos que obtuve de la BD 
+                //var_dump($sentencia);
+                $array = $guardar->armarArray($arrayCabecera, $array); //armo el array con los datos de la vista y los datos que obtuve de la BD 
+                //var_dump($array);
                 //array_shift($array); //remuevo el primer elemento id si es nuevo se genera automaticamente en la BD
                 $this->refControladorPersistencia->ejecutarSentencia($sentencia, $array); //genero la consulta
                 $this->refControladorPersistencia->get_conexion()->commit();
@@ -205,6 +214,24 @@ class ControladorMaster {
         }
     }
 
+
+    public function buscarUsuario($dato, $tabla) {
+        $buscar = new SqlQuery();
+        try {
+            $this->refControladorPersistencia->get_conexion()->beginTransaction();
+            $usuarioConsulta = $this->refControladorPersistencia->ejecutarSentencia(
+                    $buscar->buscarUsuario($dato, $tabla));
+            $arrayUsuario = $usuarioConsulta->fetchAll(PDO::FETCH_ASSOC); //utilizo el FETCH_ASSOC para que no repita los campos
+            $this->refControladorPersistencia->get_conexion()->commit(); //realizo el commit para obtener los datos
+            return $arrayUsuario; //regreso el array de usuario que necesito para mostrar los datos que han sido almacenados en la base de datos.
+        } catch (PDOException $excepcionPDO) {
+            echo "<br>Error PDO: " . $excepcionPDO->getTraceAsString() . '<br>';
+            $this->refControladorPersistencia->get_conexion()->rollBack(); //si salio mal hace un rollback
+        } catch (Exception $exc) {
+            echo $exc->getTraceAsString();
+            $this->refControladorPersistencia->get_conexion()->rollBack();  //si hay algún error hace rollback
+        }
+    }
 
 
     public function bucarUltimo($tabla) {

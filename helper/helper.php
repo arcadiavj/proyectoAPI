@@ -4,7 +4,9 @@ $limpio = array();
 $i = 0;
 foreach ($array as $arr) {
         foreach ($arr as $key => $value ) {
-            if($key == 'subid' ||
+            if(
+            $key == 'subid' ||
+            $key == 'contrasena' ||
             $key == 'ingreso'||
             $key == 'precio'||
             $key == 'unitario'||
@@ -32,10 +34,21 @@ foreach ($array as $arr) {
    return $limpio;
 }
 
-function limpiarConraseñaArray($array){
+function contrasena($cadena){
+    
+    $cadena = mb_strtoupper($cadena);
+	return ( strlen($cadena)>0 ) ? md5($cadena) : NULL;
+}
+
+function fecha(){
+    $fecha = time();
+    return $fechaR = date('Y-m-d H:m:s',$fecha);
+}
+
+function limpiarIndiceToken($array){
     $limpio = array();
         foreach ($array as $key => $value ) {
-           if($key == 'contrasena'){
+           if($key == 'token'){
                 unset($array[$key]);                
             }
             $limpio = $array;
@@ -84,3 +97,46 @@ function arrayProvincias($registro, $provincia){
     return $registro;
 
 }
+
+function compararVista($array, $datos){ 
+    $nuevo =array_keys($array);
+    $nuevo =array_fill_keys($nuevo, NULL );
+    foreach ($datos as $key => $value) {
+        if(array_key_exists($key, $array)){
+            $nuevo[$key] = $datos[$key];
+        }
+    }
+    return $nuevo;
+}
+
+function llamadaArray(){
+    return $array = [
+        'usuarios.id,',
+        'usuarios.alta,',
+        'usuarios.rol,',
+        'usuarios.usuario,',
+        'usuarios.contrasena,',
+        'usuarios.correo,',
+        'usuarios.idproveedor,',
+        'usuarios.proveedor,',
+        'usuarios.cuit,',
+        'usuarios.dni,',
+        'usuarios.nombre AS nombreUsuairio,',
+        'usuarios.apellido,',
+        'usuarios.domicilio,',
+        'usuarios.pais,',
+        'usuarios.provincia,',
+        'usuarios.ciudad,',
+        'usuarios.localidad,',
+        'usuarios.telefono1,',
+        'usuarios.telefono2,',
+        'usuarios.estado,',
+        'usuarios.plataforma,',
+        'usuarios.subid,',
+        'usuarios.ingreso,',
+        'usuarios.idtiki,',
+        'paquetes.nombre AS nombrePaquete,',
+        'paquetes_usuarios.paquete'
+        ];
+}
+ 

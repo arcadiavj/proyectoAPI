@@ -305,6 +305,7 @@ $app->get('/vistaNotificaciones', function() {
 
 $app->get('/usuarios(/:id)', function($id=null) use ($app){
     $response = array();
+    //var_dump($id);
     $header = $app->request->headers();
     if( $id == null ){
         $app->redirect('usuariosApi');
@@ -312,6 +313,32 @@ $app->get('/usuarios(/:id)', function($id=null) use ($app){
         include_once '../controladores/ControladorUsuarios.php';
         $consulta = new ControladorUsuarios();
         $registros = $consulta->buscarUsuarioXId($id);
+        $provincias = $consulta->buscarProvincias($registros);
+        $paquetes = $consulta->buscarPaquetes($registros);
+    }
+    $registros= arrayProvincias($registros, $provincias);
+    if(isset( $registros["error"]) == false){
+        //echo 'aca estoy';
+        //$registros = $app->redirect('provincias');
+    }
+    //$registros = $consulta->buscar();    
+    $response["error"] = false;
+    $response["status"] = 200;
+    $response["message"] = "Registros Guardados: " . count($registros); //podemos usar count() para conocer el total de valores de un array
+    $response["registros"] = $registros;
+
+    echoResponse(200, $response);
+});
+
+$app->get('/usuario/:id', function($id=null) use ($app){
+    $response = array();
+    $header = $app->request->headers();
+    if( $id == null ){
+        $app->redirect('usuariosApi');
+    }else{
+        include_once '../controladores/ControladorUsuarios.php';
+        $consulta = new ControladorUsuarios();
+        $registros = $consulta->buscarUsuario($id);
         $provincias = $consulta->buscarProvincias($registros);
         $paquetes = $consulta->buscarPaquetes($registros);
     }
@@ -487,14 +514,15 @@ $app->post('/notificacion',/*'authenticate'*/ function() use ($app) {
 
 $app->post('/usuario',/*'authenticate'*/ function() use ($app) {
     // check for required params
-    //verifyRequiredParams(array());
+    //verifyRequiredParams(array());    
     $header = $app->request->headers();
+    var_dump($header);
     $response = array();
     /*capturamos los parametros recibidos y los almacenamos como un nuevo array asociativo 
     para poder enviarlos a la BD*/    
-    $param = $app->request->Post();        
-    $param['token'] = $header['token'];
-    //var_dump($param);
+    $param = $app->request->Post();           
+    $param['token'] = $header['token'];   
+    //var_dump($param);  
     /* llamamos al metodo que almacene el nuevo dato, por ejemplo: */
     include_once '../controladores/ControladorUsuarios.php';
     $consulta = new ControladorUsuarios();

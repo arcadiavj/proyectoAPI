@@ -147,8 +147,9 @@ class SqlQuery {
                 }
             }
         }
-        $limpio = limpiarConraseñaArray($array);
-        return $limpio; //regreso el array
+        //$limpio = limpiarConraseñaArray($array);
+        //var_dump($array);
+        return $array; //regreso el array
     }
 
     public function armarSentencia($arrayCabecera, $tabla) {//ésta es la funcion encargada de generar la sentencia agregar en la base de datos
@@ -206,7 +207,7 @@ class SqlQuery {
             $paramArray[$llave] = $limpArray[$i];                
             $i++; //auto incremento
         }
-        
+        //var_dump($paramArray);
         return $paramArray; //regreso el array que se encuentra armado y listo para ser insertado en la BD
     }
 
@@ -276,10 +277,25 @@ class SqlQuery {
     public function buscarUsuarioId($dato, $tabla) {//sirve para generar la sentencia que se encarga de buscar un id en la tabla 
         $strTabla = strtolower(substr($tabla, 11)); //al obtener de la clase el nombre de la clase de digo que quiero que parta la palabra controlador y me haga la consulta con el nombre del formulario
         //$consulta = "SELECT * FROM " . $strTabla . " WHERE proveedor = " . $dato." AND rol = 5"; //ésta es la consulta ensambalda... tambien se prodria utilizar unida a un INNER JOIN todavía al momento de escribir esto todavía estoy pensando como hacerlo ;)
-        $consulta = "SELECT * FROM " . $strTabla . " INNER JOIN paquetes_usuarios";
-        $consulta .= " ON usuarios.id = paquetes_usuarios.usuario ";
-        $consulta .= " INNER JOIN paquetes ON paquetes_usuarios.paquete = paquetes.id ";
-        $consulta .= " WHERE proveedor = ". $dato." AND rol = 5";
+        $arrayConsulta = llamadaArray();
+        $stringConsulta = implode($arrayConsulta);
+        $consulta = "SELECT ".$stringConsulta." FROM " . $strTabla . " INNER JOIN paquetes_usuarios";
+        $consulta .= " ON ".$strTabla.".id = paquetes_".$strTabla.".usuario ";
+        $consulta .= " INNER JOIN paquetes ON paquetes_".$strTabla.".paquete = paquetes.id ";
+        $consulta .= " WHERE ".$strTabla.".idproveedor = ". $dato." AND ".$strTabla.".rol = 5";
+        return $consulta; //regreso la consulta
+    }
+
+    public function buscarUsuario($dato, $tabla) {//sirve para generar la sentencia que se encarga de buscar un id en la tabla 
+        $strTabla = strtolower(substr($tabla, 11)); //al obtener de la clase el nombre de la clase de digo que quiero que parta la palabra controlador y me haga la consulta con el nombre del formulario
+        //$consulta = "SELECT * FROM " . $strTabla . " WHERE proveedor = " . $dato." AND rol = 5"; //ésta es la consulta ensambalda... tambien se prodria utilizar unida a un INNER JOIN todavía al momento de escribir esto todavía estoy pensando como hacerlo ;)
+        $consulta ="SELECT * FROM " . $strTabla;
+        $consulta.= " LEFT JOIN paquetes_".$strTabla;
+        $consulta.= " ON ".$strTabla.".id = paquetes_".$strTabla.".usuario";
+        $consulta.= " LEFT JOIN paquetes";
+        $consulta.= " ON paquetes_".$strTabla.".paquete=paquetes.id";
+        $consulta.= " WHERE ".$strTabla.".id = ".$dato;
+        $consulta.= " AND rol = 5";
         return $consulta; //regreso la consulta
     }
 
