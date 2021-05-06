@@ -299,6 +299,18 @@ class SqlQuery {
         return $consulta; //regreso la consulta
     }
 
+    public function buscarUsuarioPaquete($usuario, $paquete) {//sirve para generar la sentencia que se encarga de buscar un id en la tabla 
+        $strTabla = ['usuarios' => $usuario, 'paquetes' => $paquete]; //al obtener de la clase el nombre de la clase de digo que quiero que parta la palabra controlador y me haga la consulta con el nombre del formulario
+        $consulta ="";
+        foreach ($strTabla as $key => $value) {
+            $consulta .="SELECT * FROM ".$key." WHERE id = ".$value.";";            
+        }
+        var_dump($consulta);
+        return $consulta;
+       
+         //regreso la consulta
+    }
+
     public function buscarPaqueteProveedor($tabla,$dato) {//sirve para generar la sentencia que se encarga de buscar un id en la tabla 
         $strTabla = strtolower(substr($tabla, 11)); //al obtener de la clase el nombre de la clase de digo que quiero que parta la palabra controlador y me haga la consulta con el nombre del formulario
         //$consulta = "SELECT * FROM " . $strTabla . " WHERE proveedor = " . $dato." AND rol = 5"; //ésta es la consulta ensambalda... tambien se prodria utilizar unida a un INNER JOIN todavía al momento de escribir esto todavía estoy pensando como hacerlo ;)
@@ -463,6 +475,16 @@ class SqlQuery {
         $consulta.= " WHERE paquetes_usuarios.usuario =".$dato;
         return $consulta;
     }
+
+    public function verificarProvincia($datosCampos, $i=0){
+        $consulta = "SELECT ubicacion_localidades.ciudad, ubicacion_ciudades.provincia "; 
+        $consulta .="FROM ubicacion_localidades INNER JOIN ubicacion_ciudades ";
+        $consulta .="ON ubicacion_localidades.ciudad = ubicacion_ciudades.id ";
+        $consulta .="WHERE ubicacion_localidades.id = ".$datosCampos['localidad'];
+        return $consulta;
+    }
+
+   
 
 
 }

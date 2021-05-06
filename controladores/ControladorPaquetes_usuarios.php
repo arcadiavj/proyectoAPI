@@ -26,10 +26,18 @@ class ControladorPaquetes_usuarios extends ControladorGeneral {
     }
 
     
-    public function buscarUsuarioXId($dato) {//este método es el encargado de realiza la busqueda del último usuario insertado usando SqlQuery      
+    public function buscarPaqueteXId($dato) {//este método es el encargado de realiza la busqueda del último usuario insertado usando SqlQuery      
         (string) $tabla = get_class($this); //adquiero el nombre de la clase para usar en la tabla
-        $master = new ControladorMaster();
+        $master = new ControladorMaster();        
         return $master->buscarId($dato, $tabla);
+    }
+
+    public function buscarDatosUsuarioPaquete($idUsuario, $idPaquete){
+        var_dump($idUsuario);
+        var_dump($idPaquete);
+        $master = new ControladorMaster();
+        return $master -> usuarioPaquete($idUsuario, $idPaquete);
+
     }
 
     public function guardar($datosCampos) {//funcion guardar con SqlQuery implementado

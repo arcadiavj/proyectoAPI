@@ -139,4 +139,99 @@ function llamadaArray(){
         'paquetes_usuarios.paquete'
         ];
 }
+
+
+function camposRequeridos(){
+    return $array = [
+        'rol',
+        'usuario',
+        'contrasena',
+        'correo',
+        'cuit',
+        'dni',
+        'nombre',
+        'apellido',
+        'domicilio',
+        'pais',
+        'provincia',
+        'ciudad',
+        'localidad',
+        'telefono1',
+        'estado',
+    ];
+}
+
+function validarProvinciasHelper($arrayProvincias, $datosCampos){
+    $error = 0;
+    foreach ($datosCampos as $key => $value) {
+       switch ($key) {            
+            case 'ciudad':
+                $ciudad = array_search($datosCampos[$key],$arrayProvincias[0]);
+                if(!$ciudad){
+                    $error += 1; 
+                }
+                break;
+            case 'provincia':
+                $provincia = array_search($datosCampos[$key],$arrayProvincias[0]);                
+                if(!$provincia){
+                    $error += 2; 
+                }
+                break;
+           default:
+               break;
+       }
+        
+    }
+    if($error == 0){  
+        $response["error"] = false;      
+        return $response;
+    }else if($error == 1){
+        $response["error"] = true;
+        $response["codigo"] = 400;
+        $response["message"] = "Error al crear registro. Verifica el campo Ciudad.";
+        return $response;
+    }else if($error == 2){
+        $response["error"] = true;
+        $response["codigo"] = 400;
+        $response["message"] = "Error al crear registro. Verifica el campos Provincia.";
+        return $response;
+    }else {
+        $response["error"] = true;
+        $response["codigo"] = 400;
+        $response["message"] = "Error al crear registro. Verifica los campos Ciudad y Provincia.";
+        return $response;
+    }
+
+}
+
+function camposVacios($datosCampos){
+    $array = camposRequeridos();
+    $faltantes= array();
+    $contar= 0;
+    foreach ($datosCampos as $key => $value) {
+        for ($i=0; $i < count($array); $i++) { 
+            if($array[$i] == $key){
+                array_push($faltantes, $key);
+                $contar++;
+            }
+        }
+    }
+    $arrayDiff = array_diff($array, $faltantes);
+    if($contar  == count($array)){
+        $response["error"] = false;
+        return $response;
+    }else{
+        $response["error"] = true;
+        $response["codigo"] = 400;
+        $response["message"] = "Error al crear registro. Verifica los campos obligatorios.";
+        $response["faltantes"] = $arrayDiff;    
+        return $response;
+    }    
+}
+
+function armarSugerencia($array){
+    $sugerencia = $array[0].'W'.($array[1]+1);
+    return $sugerencia;
+}
  
+

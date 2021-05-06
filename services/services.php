@@ -1,7 +1,7 @@
 <?php
 
 define("__URL__", "http://localhost/proyecto17-3/app/apiRest/v1/");  //constate con la direccion donde realizar la consulta cambiar por URL producción
-define("__TOKEN__", "token: ULRGVHAGWDLKR6LS0IFF0HLJWITTFMWLFYOQ2C5V");  //token generado previamente que debe incluirse en los headers de la consutla
+define("__TOKEN__", "token: abc123");  //token generado previamente que debe incluirse en los headers de la consutla
 
 class Services{
 
@@ -67,6 +67,30 @@ class Services{
           curl_close($ch);
           echo $res;       
         }
+
+        public function updateUsuario($usuario){
+          $ch = curl_init();  //cURL  inicializacion           
+          curl_setopt($ch, CURLOPT_URL,__URL__."usuario");
+          curl_setopt($ch,CURLOPT_POSTFIELDS,$usuario);
+          curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            "application/x-www-form-urlencoded",// incluir en header
+            __TOKEN__//token que se genera
+              ),
+            );              
+          $res = curl_exec($ch);
+          curl_close($ch);
+          echo $res;       
+        }
+
+        public function getPaquetesUsuario($dato){//método para la llamada al servicio
+          $config = null;   
+          $ch = curl_init();  //cURL  inicializacion 
+          curl_setopt($ch, CURLOPT_URL,__URL__."paquetesUsuarios/".$dato);
+          curl_setopt_array($ch,$this->$config);// opciones de configuracion      
+          $res = curl_exec($ch);// respuesta
+          curl_close($ch);// cierro consulta
+          echo $res;// imprimo respuesta     
+          }
 
 
 }

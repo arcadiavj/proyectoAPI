@@ -3,6 +3,8 @@
 //require_once 'ControladorGeneral.php';
 require_once 'SqlQuery.php';
 require_once '../persistencia/ControladorPersistencia.php';
+include_once '../helper/helper.php';
+
 /*
  * Clase generada para servir de controlador maestro 
  */
@@ -215,6 +217,26 @@ class ControladorMaster {
     }
 
 
+    public function usuarioPaquete($idUsuario, $idPaquete){
+        $buscar = new SqlQuery();
+        try {
+            $this->refControladorPersistencia->get_conexion()->beginTransaction();
+            $usuarioConsulta = $this->refControladorPersistencia->ejecutarSentencia(
+                    $buscar->buscarUsuarioPaquete($idUsuario, $idPaquete));
+            $arrayUsuario = $usuarioConsulta->fetchAll(PDO::FETCH_ASSOC); //utilizo el FETCH_ASSOC para que no repita los campos
+            array_push($arrayUsuario);
+            var_dump($arrayUsuario);
+            $this->refControladorPersistencia->get_conexion()->commit(); //realizo el commit para obtener los datos
+            return $arrayUsuario; //regreso el array de usuario que necesito para mostrar los datos que han sido almacenados en la base de datos.
+        } catch (PDOException $excepcionPDO) {
+            echo "<br>Error PDO: " . $excepcionPDO->getTraceAsString() . '<br>';
+            $this->refControladorPersistencia->get_conexion()->rollBack(); //si salio mal hace un rollback
+        } catch (Exception $exc) {
+            echo $exc->getTraceAsString();
+            $this->refControladorPersistencia->get_conexion()->rollBack();  //si hay algún error hace rollback
+        } 
+    }
+
     public function buscarUsuario($dato, $tabla) {
         $buscar = new SqlQuery();
         try {
@@ -241,6 +263,7 @@ class ControladorMaster {
             $usuarioConsulta = $this->refControladorPersistencia->ejecutarSentencia($ultimo->buscarUltimo($tabla)); //en esta consulta busco cual es el ultimo usuario            
             $arrayUsuario = $usuarioConsulta->fetchAll(PDO::FETCH_ASSOC); //utilizo el FETCH_ASSOC para que no repita los campos
             $this->refControladorPersistencia->get_conexion()->commit(); //realizo el commit de los datos a la base de datos
+            $ultimo = $arrayUsuario[0]['MAX(id)'];
             $idUsuario = ""; //creo una variable para poder enviar los datos al metodo correpondiente
             foreach ($arrayUsuario as $id) {//recorro el array que contiene los datos que necesito para buscarl el ultimo usuario
                 foreach ($id as $clave => $value) {//recorro los datos dentro del array y obtengo el valor que necesito
@@ -249,9 +272,9 @@ class ControladorMaster {
             }
             //envio los datos al metodo que se va a encargar de ralizar la consulta a la base de 
             //datos para obtener el último usiario registrado y devolver los datos para mostrarlos por pantalla
-            $usuarioId = $this->buscarUsuarioXId($idUsuario, $tabla); //lamo al metodo para obtener todos los datos del usuario que 
+            //$usuarioId = $this->buscarUsuarioXId($idUsuario, $tabla); //lamo al metodo para obtener todos los datos del usuario que 
             //estoy buscando en este caso el último que se creo
-            return $usuarioId; //regreso los datos de ese usuario a la llamada para enviarlos desde el ruteador a la vista
+            return $ultimo; //regreso los datos de ese usuario a la llamada para enviarlos desde el ruteador a la vista
         } catch (PDOException $excepcionPDO) { //atrapo la excepcion por si algo salio mal que se realice el rollback           
             echo "<br>Error PDO: " . $excepcionPDO->getTraceAsString() . '<br>';
             $this->refControladorPersistencia->get_conexion()->rollBack(); //si salio mal hace un rollback
@@ -369,6 +392,34 @@ class ControladorMaster {
             echo $exc->getTraceAsString();
             $this->refControladorPersistencia->get_conexion()->rollBack(); //si salio mal hace un rollback
         }
+    }
+
+    public function verificarProvincia($datosCampos){
+        $buscar = new SqlQuery();
+        try {
+            $this->refControladorPersistencia->get_conexion()->beginTransaction(); //comienza la transacción
+            $statement = $this->refControladorPersistencia->ejecutarSentencia(
+                    $buscar->verificarProvincia($datosCampos)); //senencia armada desde la clase SqlQuery sirve para comenzar la busqueda
+            $array = $statement->fetchAll(PDO::FETCH_ASSOC); //retorna un array asociativo para no duplicar datos
+            //validarProvinciasHelper($array, $datosCampos);
+            $this->refControladorPersistencia->get_conexion()->commit(); //si todo salió bien hace el commit            
+            return $array; //regreso el array para poder mostrar los datos en la vista... con Ajax... y dataTable de JavaScript
+        } catch (PDOException $excepcionPDO) {
+            echo "<br>Error PDO: " . $excepcionPDO->getTraceAsString() . '<br>';
+            $this->refControladorPersistencia->get_conexion()->rollBack(); //si salio mal hace un rollback
+        } catch (Exception $exc) {
+            echo $exc->getTraceAsString();
+            $this->refControladorPersistencia->get_conexion()->rollBack(); //si salio mal hace un rollback
+        }
+    }
+
+
+    public function sugerir($token, $tabla){
+        $usuario = $this->porToken($tabla."_api", array('token'=>$token));
+        $ultimo = $this->bucarUltimo($tabla);       
+        $usuario = $usuario[0]['usuario'];
+        return array($usuario, $ultimo);
+
     }
 
 }

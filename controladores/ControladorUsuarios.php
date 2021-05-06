@@ -47,6 +47,13 @@ class ControladorUsuarios extends ControladorGeneral {
         $limpio = limpiarConraseña($array);
         return $limpio;
     }
+    public function sugerir($token){
+        (string) $tabla = get_class($this); //adquiero el nombre de la clase para usar en la tabla
+            $master = new ControladorMaster();
+            $array = $master->sugerir($token, $tabla);
+            $sugerido = armarSugerencia($array);
+            return $sugerido;
+        }
 
     public function guardar($datosCampos) {//funcion guardar con SqlQuery implementado
         $token = $datosCampos['token'];
@@ -60,7 +67,11 @@ class ControladorUsuarios extends ControladorGeneral {
         var_dump($datosCampos);
         $datosCampos['contrasena'] = contrasena($datosCampos['contrasena']);
         $datosCampos['alta']=fecha();
-       
+        $arrayProvincias = $master->verificarProvincia($datosCampos);
+        $provincias = validarProvinciasHelper($arrayProvincias, $datosCampos);
+        if($provincias['error']){
+            return $provincias;
+        }
         $usuario = $master->verificarExistenciaEnTabla($tabla, $datosCampos['usuario']);
         if($usuario['0']['COUNT(*)'] == '0'){
             require_once '../services/tiki.php';
@@ -109,15 +120,17 @@ class ControladorUsuarios extends ControladorGeneral {
     public function buscarPaquetes($datosCampos){
         $resultados = array();
         $guardar = new SqlQuery(); //instancio objeto de la clase sqlQuery
-        (string) $tabla = get_class($this); //obtengo el nombre de la clase para poder realizar la consulta
         $master = new ControladorMaster();
+        if($datosCampos){
+            $resultados = $master->buscarPaquetes($datosCampos);
+        }else{
         foreach ($datosCampos as $key => $value) {
             if($value['paquete'] == null){
                 $value['paquete'] = '1';
             };
             $resultados[$value['paquete']] = $master->buscarPaquetes($value['paquete']);
-        }
-        
+        }    
+     }   
         return $resultados;
     }
 

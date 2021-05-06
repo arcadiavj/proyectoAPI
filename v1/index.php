@@ -149,6 +149,17 @@ $app->get('/paquetesUsuarios', function() {
     echoResponse(200, $response);
 });
 
+$app->get('/paquetesUsuarios/:id', function($id) {
+    $response = array();
+    include_once '../controladores/ControladorUsuarios.php';
+    $consulta = new ControladorUsuarios();
+    $registros = $consulta->buscarPaquetes($id);
+    $response["error"] = false;
+    $response["message"] = "Registros Guardados: " . count($registros); //podemos usar count() para conocer el total de valores de un array
+    $response["registros"] = $registros;
+    echoResponse(200, $response);
+});
+
 $app->get('/promocionesDestinatarios', function() {
     $response = array();
     include_once '../controladores/ControladorPromociones.php';
@@ -513,21 +524,27 @@ $app->post('/notificacion',/*'authenticate'*/ function() use ($app) {
 });
 
 $app->post('/usuario',/*'authenticate'*/ function() use ($app) {
-    // check for required params
-    //verifyRequiredParams(array());    
+ 
     $header = $app->request->headers();
-    var_dump($header);
     $response = array();
+    $registros = array();
     /*capturamos los parametros recibidos y los almacenamos como un nuevo array asociativo 
     para poder enviarlos a la BD*/    
-    $param = $app->request->Post();           
-    $param['token'] = $header['token'];   
-    //var_dump($param);  
+    $param = $app->request->Post();
+    // verificamos que estén todos los campos  
+    $registros = camposVacios($param);
     /* llamamos al metodo que almacene el nuevo dato, por ejemplo: */
-    include_once '../controladores/ControladorUsuarios.php';
-    $consulta = new ControladorUsuarios();
-    $registros = $consulta->guardar($param);        
-
+    if(!$registros['error']){
+        $param['token'] = $header['token'];        
+        include_once '../controladores/ControladorUsuarios.php';        
+        $consulta = new ControladorUsuarios();
+        $sugerirUsuario = $consulta->sugerir($param['token']);
+        if($param['usuario'] == ''){
+            $param['usuario'] =$sugerirUsuario;
+        } 
+        var_dump($param);
+        $registros = $consulta->guardar($param);        
+    }
     if ( !isset($registros['codigo'])) {
         $response["error"] = false;
         $response["message"] = "Registro creado satisfactoriamente!";
@@ -536,8 +553,11 @@ $app->post('/usuario',/*'authenticate'*/ function() use ($app) {
     } else {
         $response["error"] = true;
         $response["message"] = "Error al crear registro. Por favor intenta nuevamente.";
+        $response["info"] = $registros;
         echoResponse(400, $response);
     }
+
+    
     
 });
 
@@ -546,7 +566,6 @@ $app->post('/paquete', function() use($app){
     $response = array();
     $header = $app->request->headers();
     $datos = array('token'=>$header['token']);
-    $response = array();
     include_once '../controladores/ControladorUsuarios_api.php';
     $consulta = new ControladorUsuarios_api();  
     $registros = $consulta->existe($datos);
@@ -698,7 +717,7 @@ $app->run();
 /**
  * Verificando los parametros requeridos en el metodo o endpoint
  */
-function verifyRequiredParams($required_fields) {
+function verificarParametros($camposRequeridos) {
     $error = false;
     $error_fields = "";
     $request_params = array();
@@ -708,7 +727,7 @@ function verifyRequiredParams($required_fields) {
         $app = \Slim\Slim::getInstance();
         parse_str($app->request()->getBody(), $request_params);
     }
-    foreach ($required_fields as $field) {
+    foreach ($camposRequeridos as $campos) {
         if (!isset($request_params[$field]) || strlen(trim($request_params[$field])) <= 0) {
             $error = true;
             $error_fields .= $field . ', ';
@@ -731,7 +750,7 @@ function verifyRequiredParams($required_fields) {
 /**
  * Validando parametro email si necesario; un Extra ;)
  */
-function validateEmail($email) {
+function validarEmail($email) {
     $app = \Slim\Slim::getInstance();
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $response["error"] = true;
